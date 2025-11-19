@@ -1,6 +1,7 @@
 ﻿#include <stdio.h>
 #include <windows.h>
 #include "Screen.h"
+#include "CreateFile.h"
 
 #define YELLOW (FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY)
 #define WHITE (FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE)
@@ -8,43 +9,6 @@
 
 #define MENU_COUNT 5
 
-/*
-struct Screen {
-    int columns;
-    int rows;
-};
-
-struct Screen get_screen() {
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-
-    int columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-    int rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
-
-    struct Screen screen = { columns, rows };
-
-    return screen;
-}
-
-void set_console_position(int x, int y) {
-    COORD pos = { x, y };
-    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
-}
-
-
-void set_text_color(WORD color) {
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
-}
-
-void draw_vertical_line(int x, int top, int bottom, char ch) {
-    /*HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    COORD pos;
-    for (int y = top; y <= bottom; y++) {
-
-        set_console_position(x, y);
-        putchar(ch);
-    }
-}*/
 
 void editor_setup() {
     struct Screen screen = get_screen();
@@ -56,7 +20,7 @@ void editor_setup() {
     SetConsoleCursorPosition(hConsole, pos);
 }
 
-void menu_setup() {
+int menu_setup() {
     char* items[MENU_COUNT] = { "1. Create File", "2. Delete File", "3. View Files", "4. Select File", "5. Exit"};
     
     int selected = -1;
@@ -94,11 +58,25 @@ void menu_setup() {
     }
 
     set_text_color(WHITE);
+
+    return selected;
 }
 
 int main() {
+    struct File files[10];
     //editor_setup();
-    menu_setup();
+    int selection = menu_setup();
+
+    switch (selection) {
+    case 0:
+        createfile_setup(files);
+        break;
+
+    case 4:
+        break;
+    default:
+        break;
+    }
 
 
     return 0;
