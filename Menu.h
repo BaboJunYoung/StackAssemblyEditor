@@ -10,3 +10,7 @@ struct File {
 
 
 void createfile_setup(struct File files[]);
+
+void deletefile_setup(struct File files[]);
+
+void selectfile_setup(struct File files[]);
