@@ -4,20 +4,109 @@
 #define WHITE (FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE)
 #define CYAN (FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY)
 
+#define TL 218
+#define TR 191
+#define BL 192
+#define BR 217
+#define H 196
+#define V 179
+
+#define LEFT_T 195
+
+#define BOX 220 
+
+
+// fill은 채움의 정도
+void print_stack(int divide_x, int fill) {
+    struct Screen screen = get_screen();
+
+    // 스택 영역 표시
+    set_console_position(divide_x + 3, 1);
+    printf("Stack Memory");
+
+    draw_horizontal_line((int)(screen.rows / 2), divide_x + 1, screen.columns, H);
+
+
+    draw_vertical_line(divide_x + 6, 4, ((int)(screen.rows / 2)) - 2, V);
+    draw_vertical_line(screen.columns - 5, 4, ((int)(screen.rows / 2)) - 2, V);
+
+    draw_horizontal_line(3, divide_x + 7, screen.columns - 6, H);
+    draw_horizontal_line(((int)(screen.rows / 2)) - 2, divide_x + 7, screen.columns - 6, H);
+
+    set_console_position(divide_x + 6, 3);
+    putchar(TL);
+
+    set_console_position(screen.columns - 5, 3);
+    //wprintf("┐");
+    putchar(TR);
+
+    set_console_position(divide_x + 6, ((int)(screen.rows / 2)) - 2);
+    //wprintf("└");
+    putchar(BL);
+
+    set_console_position(screen.columns - 5, ((int)(screen.rows / 2)) - 2);
+    //wprintf("┘");
+    putchar(BR);
+
+
+    for (int i = 0; i < fill; i++) {
+        draw_horizontal_line(((int)(screen.rows / 2)) - (3 + i), divide_x + 7, screen.columns - 6, BOX);
+
+        set_console_position(divide_x + 3, ((int)(screen.rows / 2)) - (3 + i));
+        printf("%d", i);
+    }
+}
+
+void print_stack_log(int divide_x, struct Stack *s) {
+    struct Screen screen = get_screen();
+
+    for (int i = 0; i < s->top + 1; i++) {
+        if (screen.rows - (i) == ((int)(screen.rows / 2)) + 2) {
+            break;
+        }
+
+        set_console_position(divide_x + 3, screen.rows - (i + 2));
+        printf("%d", i);
+
+        set_console_position(divide_x + 6, screen.rows - (i + 2));
+        putchar(V);
+
+        set_console_position(divide_x + 9, screen.rows - (i + 2));
+        set_text_color(YELLOW);
+        printf("%d", s->value[i]);
+        set_text_color(WHITE);
+    }
+}
+
+
 void editor_setup(struct File* file) {
     system("cls");
 
-    char code[50][100] = { 0 };  // ← file->code와 크기 일치 (100바이트)
+    char code[50][100] = { 0 };  // file->code와 크기 일치 (100바이트)
+    struct Stack s;
 
-    // file 구조체에 이미 작성한 코드를 임시 변수로 복사
-    int existed = 0;
-    while (existed < 50 && file->code[existed][0] != '\0') {
-        strcpy_s(code[existed], 100, file->code[existed]);  // ← 100으로 수정
-        existed++;
+    init_stack(&s);
+    push(&s, 3284);
+    push(&s, 1021);
+    push(&s, 23494);
+
+    // 모든 줄을 복사 (빈 줄 포함)
+    for (int i = 0; i < 50; i++) {
+        strcpy_s(code[i], 100, file->code[i]);
     }
 
+    // 마지막으로 내용이 있는 줄 찾기
     int line = 0;
+    for (int i = 49; i >= 0; i--) {
+        if (file->code[i][0] != '\0') {
+            line = i + 1;
+            break;
+        }
+    }
+
     int pos = 0;
+
+    char cmd[20];
 
     while (1) {
         system("cls");
@@ -32,15 +121,17 @@ void editor_setup(struct File* file) {
 
         // 세로선 그리기
         int divider_x = (int)(screen.columns / 1.5);
-        draw_vertical_line(divider_x, 0, screen.rows - 1, '|');
+        draw_vertical_line(divider_x, 0, screen.rows - 1, V);
+        
+        set_console_position(divider_x, (int)(screen.rows / 2));
+        putchar(LEFT_T);
 
         // 코드 영역 표시
         set_console_position(2, 3);
         printf("Code Editor (ESC to exit)");
 
-        // 스택 영역 표시
-        set_console_position(divider_x + 3, 1);
-        printf("Stack Memory");
+        print_stack(divider_x, s.top + 1);
+        print_stack_log(divider_x, &s);
 
         // 상태 표시
         set_console_position(2, screen.rows - 2);
@@ -63,6 +154,27 @@ void editor_setup(struct File* file) {
         if (ch == 27) {  // ESC
             break;
         }
+
+
+        else if (ch == ':') {
+            set_console_position(2, screen.rows - 4);
+            printf(":");
+
+            set_console_position(3, screen.rows - 4);
+            scanf_s("%s", cmd, 20);
+
+            if (strchr(cmd, 'w')) {
+                for (int i = 0; i < 50; i++) {
+                    strcpy_s(file->code[i], 100, code[i]);  // 빈 줄도 포함해서 모두 복사
+                }
+            }
+            
+            if (strchr(cmd, 'x')) {
+
+            }
+        }
+
+
         else if (ch == 8) {  // Backspace
             if (pos > 0) {
                 int len = strlen(code[line]);
@@ -82,6 +194,8 @@ void editor_setup(struct File* file) {
                 pos = 0;
             }
         }
+        
+        
         else if (ch == 224 || ch == 0) {  // 방향키
             ch = _getch();
             if (ch == 75 && pos > 0) pos--;  // 왼쪽
@@ -95,10 +209,12 @@ void editor_setup(struct File* file) {
                 if (pos > strlen(code[line])) pos = strlen(code[line]);
             }
         }
+        
+        
         else if (ch >= 32 && ch <= 126) {  // 출력 가능한 문자
             int len = strlen(code[line]);
 
-            if (len < 99) {  // ← 버퍼 크기 (100 - 1)
+            if (len < 99) {  // 버퍼 크기 (100 - 1)
                 for (int i = len; i >= pos; i--) {
                     code[line][i + 1] = code[line][i];
                 }

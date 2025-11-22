@@ -19,3 +19,5 @@ void set_console_position(int x, int y);
 void set_text_color(WORD color);
 
 void draw_vertical_line(int x, int top, int bottom, char ch);
+
+void draw_horizontal_line(int y, int start, int end, char ch);

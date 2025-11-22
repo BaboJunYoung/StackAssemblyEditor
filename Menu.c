@@ -147,7 +147,7 @@ void selectfile_setup(struct File files[]) {
         max_size = item_y;
 
         if (max_size == 0) {
-            set_console_position(screen.columns / 2 - 10, screen.rows / 2);
+            set_console_position(screen.columns / 2 - 9, screen.rows / 2);
             printf("No files available");
             _getch();
             break;

@@ -34,3 +34,10 @@ void draw_vertical_line(int x, int top, int bottom, char ch) {
         putchar(ch);
     }
 }
+
+void draw_horizontal_line(int y, int start, int end, char ch) {
+    for (int i = start; i <= end; i++) {
+        set_console_position(i, y);
+        putchar(ch);
+    }
+}

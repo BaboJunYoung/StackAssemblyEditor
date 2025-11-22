@@ -21,7 +21,7 @@ int menu_setup() {
 
         set_text_color(CYAN);
         char* title = "--- Stack Assembly Editor ---";
-        set_console_position(screen.columns / 2 - (strlen(title) / 2), screen.rows / 2 - 3);
+        set_console_position(screen.columns / 2 - (strlen(title) / 2) + 1, screen.rows / 2 - 3);
         printf("%-20s", title);
 
         for (int i = 0; i < MENU_COUNT; i++) {
@@ -57,6 +57,8 @@ int menu_setup() {
 int main() {
     struct File files[10];
     //editor_setup();
+
+    SetConsoleOutputCP(437);  // DOS 확장 ASCII 코드 페이지
 
     for (int i = 0; i < 10; i++) {
         strcpy_s(files[i].name, 20, "undefined");
